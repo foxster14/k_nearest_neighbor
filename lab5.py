@@ -28,33 +28,33 @@ x = x.apply(stats.zscore)
 ## Split the data 60/40
 ## randomly select the training & test data, choose row by row for test data to see the distances from the test data
 ## x-value, and y-value 
-x_train, x_test, y_train, y_test = train_test_split(x, y, train_size = 0.6, random_state = 0, shuffle=True)
+train, test = train_test_split(data_frame, train_size = 0.6, random_state = 0, shuffle=True)
 
 # calculate the Euclidean distance between two vectors
 def euclidean_distance(x1, x2, y1, y2, z1, z2, k1, k2):
 	distance = 0.0
-	for i in range(len(x1)-1):
-		distance += ((x1[i] - x2[i])**2) + ((y1[i] - y2[i])**2) + ((z1[i] - z2[i])**2) + ((k1[i] - k2[i])**2)
-	return np.sqrt(distance)
+	distance += np.sqrt(((x1 - x2)**2) + ((y1 - y2)**2) + ((z1 - z2)**2) + ((k1 - k2)**2))
+	return distance
 
 distance_df = pd.DataFrame()
 distance_df['distance'] = 0.0
 distance_df['fruit_label'] = 0.0
-
-x_test2 = x_test.reset_index()
-x_train2 = x_train.reset_index()
-y_train2 = y_train.reset_index()
+distance_df['fruit_name'] = ''
 
 #print(x_test.at[0,'width'].reset_index())
-for i in range(len(x_test2)):
-    distance = ((x_test2.at[i,'mass'] - x_train2.at[i, 'mass'])**2) + ((x_test2.at[i,'width'] - x_train2.at[i,'width'])**2) + ((x_test2.at[i,'height'] - x_train2.at[i,'height'])**2) + ((x_test2.at[i,'color_score'] - x_train2.at[i,'color_score'])**2)
-    distance = np.sqrt(distance)
-    distance_df.at[i,'distance'] = distance
-    distance_df.at[i,'fruit_label'] = y_train2.at[i,'fruit_label']
+for index, row in test.iterrows():
+    for index2, row2 in train.iterrows():
+        distance = euclidean_distance(row['mass'], row2['mass'], row['width'], row2['width'], row['height'], row2['height'], row['color_score'], row2['color_score'])
+        distance_df.loc[index, index2] = distance
+print(distance_df)
+    #distance = ((test.at[i,'mass'] - train.at[i, 'mass'])**2) + ((test.at[i,'width'] - train.at[i,'width'])**2) + ((test.at[i,'height'] - train.at[i,'height'])**2) + ((test.at[i,'color_score'] - train.at[i,'color_score'])**2)
+    #distance = np.sqrt(distance)
+    #distance_df.at[i,'distance'] = distance
+    #distance_df.at[i,'fruit_label'] = train.at[i,'fruit_label']
 
 ## find the most occured value 
 ## find the frequency of each unique value, and choose the top frequency value
-distance_df = distance_df.sort_values(by='distance', ascending=True)
+distance_df = distance_df.sort_values(by=18, ascending=True)
 print(distance_df)
 
 
