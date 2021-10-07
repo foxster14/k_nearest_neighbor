@@ -37,16 +37,27 @@ def euclidean_distance(x1, x2, y1, y2, z1, z2, k1, k2):
 	return distance
 
 distance_df = pd.DataFrame()
-distance_df['distance'] = 0.0
-distance_df['fruit_label'] = 0.0
+#distance_df['distance'] = 0.0
+#distance_df['fruit_label'] = 0.0
 distance_df['fruit_name'] = ''
+fruitNames = []
 
 #print(x_test.at[0,'width'].reset_index())
+## train data is the columns (header) of the new vector
+## test data is the rows (index)
 for index, row in test.iterrows():
     for index2, row2 in train.iterrows():
         distance = euclidean_distance(row['mass'], row2['mass'], row['width'], row2['width'], row['height'], row2['height'], row['color_score'], row2['color_score'])
         distance_df.loc[index, index2] = distance
-print(distance_df)
+        #print(train.at[range(index),'fruit_name'])
+    print(row['fruit_name'])
+        #if row['fruit_name'] == row2['fruit_name']:
+            #fruitNames.append(train.at[row,'fruit_name'])
+        #distance_df.at['fruit_name'] = fruitNames
+            #add row[fruit_label] to distance_df.at['fruit_label']
+ #### for each row, iterate through columns for smallest x values ####
+ #### out of the smallest values (make list), find most occurences of fruit_label        
+ #### Add a column called y_predicted to the test dataframe
     #distance = ((test.at[i,'mass'] - train.at[i, 'mass'])**2) + ((test.at[i,'width'] - train.at[i,'width'])**2) + ((test.at[i,'height'] - train.at[i,'height'])**2) + ((test.at[i,'color_score'] - train.at[i,'color_score'])**2)
     #distance = np.sqrt(distance)
     #distance_df.at[i,'distance'] = distance
@@ -54,7 +65,7 @@ print(distance_df)
 
 ## find the most occured value 
 ## find the frequency of each unique value, and choose the top frequency value
-distance_df = distance_df.sort_values(by=18, ascending=True)
+
 print(distance_df)
 
 
