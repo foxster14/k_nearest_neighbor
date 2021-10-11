@@ -23,12 +23,12 @@ x = data_frame[['mass','width','height','color_score']]
 y = data_frame['fruit_label']
 
 ## normalize before splitting
-x = x.apply(stats.zscore)
+normalized_x = x.apply(stats.zscore)
 
 ## Split the data 60/40
 ## randomly select the training & test data, choose row by row for test data to see the distances from the test data
 ## x-value, and y-value 
-train, test = train_test_split(data_frame, train_size = 0.6, random_state = 0, shuffle=True)
+x_train, x_test, y_test, y_train = train_test_split(normalized_x, y, train_size = 0.6, random_state = 0, shuffle=True)
 
 # calculate the Euclidean distance between two vectors
 def euclidean_distance(x1, x2, y1, y2, z1, z2, k1, k2):
@@ -39,22 +39,17 @@ def euclidean_distance(x1, x2, y1, y2, z1, z2, k1, k2):
 distance_df = pd.DataFrame()
 #distance_df['distance'] = 0.0
 #distance_df['fruit_label'] = 0.0
-distance_df['fruit_name'] = ''
-fruitNames = []
+#distance_df['fruit_name'] = ''
+#fruitNames = []
 
-#print(x_test.at[0,'width'].reset_index())
 ## train data is the columns (header) of the new vector
 ## test data is the rows (index)
-for index, row in test.iterrows():
-    for index2, row2 in train.iterrows():
+for index, row in x_test.iterrows():
+    for index2, row2 in x_train.iterrows():
         distance = euclidean_distance(row['mass'], row2['mass'], row['width'], row2['width'], row['height'], row2['height'], row['color_score'], row2['color_score'])
         distance_df.loc[index, index2] = distance
-        #print(train.at[range(index),'fruit_name'])
-    print(row['fruit_name'])
-        #if row['fruit_name'] == row2['fruit_name']:
-            #fruitNames.append(train.at[row,'fruit_name'])
-        #distance_df.at['fruit_name'] = fruitNames
-            #add row[fruit_label] to distance_df.at['fruit_label']
+       
+
  #### for each row, iterate through columns for smallest x values ####
  #### out of the smallest values (make list), find most occurences of fruit_label        
  #### Add a column called y_predicted to the test dataframe
@@ -66,9 +61,98 @@ for index, row in test.iterrows():
 ## find the most occured value 
 ## find the frequency of each unique value, and choose the top frequency value
 
-print(distance_df)
+#print(distance_df.sort_values(by=columns))
+k = 4
+
+#### -------- Sort Distance Values by Test & Find K-Nearest Neighbor ------ ####
+test_list = distance_df.index
+d = data_frame['fruit_name'].to_dict()
+neighbors_df = pd.DataFrame(index= distance_df.index, columns=np.arange(k))
+
+for i in range(len(distance_df)):
+    test = distance_df.iloc[:, np.argsort(distance_df.loc[test_list[i]])]
+    test = test.iloc[:,:k]
+    neighbors_df.loc[test_list[i]] = test.loc[test_list[i]].index
+
+#### ------- Find the Predicted Value -------- ####
+fruit_locations = neighbors_df.replace(d)
+fruit_locations['predicted_y'] = ''
+
+#### ------- Locate occurences of each fruit ---------- ####
+lemonLoc = fruit_locations.isin(['lemon']).sum(axis=1)
+orangeLoc = fruit_locations.isin(['orange']).sum(axis=1)
+appleLoc = fruit_locations.isin(['apple']).sum(axis=1)
+mandarinLoc = fruit_locations.isin(['mandarin']).sum(axis=1)
+fruitCount_df = pd.DataFrame(index=distance_df.index, columns=['lemon','orange','apple','mandarin'])
+fruitCount_df['lemon'] = lemonLoc
+fruitCount_df['orange'] = orangeLoc
+fruitCount_df['apple'] = appleLoc
+fruitCount_df['mandarin'] = mandarinLoc
+
+testDataIndexValue = fruitCount_df.index
+
+for i in range(len(fruitCount_df)):
+    temp = fruitCount_df.iloc[:, np.argsort(fruitCount_df.loc[testDataIndexValue[i]])]
+    temp = temp.iloc[:,:k]
+    sortedFruitCount = fruitCount_df.sort_values(by=testDataIndexValue[i], axis=1, ascending=False)
+    #fruitCount_df[testDataIndexValue[i]] = sortedFruitCount
+    #neighbors_df.loc[test_list[i]] = temp.loc[test_list[i]].index
 
 
+for i in range(len(fruitCount_df)):
+    #print(fruitCount_df.iloc[i,:])
+    temp = fruitCount_df.iloc[:, np.argsort(fruitCount_df.loc[testDataIndexValue[i]])]
+    temp = temp.iloc[:,:k]
+    sortedFruitCount = fruitCount_df.sort_values(by=testDataIndexValue[i], axis=1, ascending=False)
+    #print(sortedFruitCount.iloc[i,:])
+    maxValueIndex = sortedFruitCount.max(axis=1)
+    #if maxValueIndex[testDataIndexValue[i]] > (len(fruit_locations.columns)/2):
+        #fruit_locations.at[testDataIndexValue[i], 'predicted_y'] = fruit_locations[testDataIndexValue[i]]
+
+#maxValueIndexObj = fruitCount_df.idxmax(axis=1)
+
+
+#### -------- Declare Empty Dataframe to Store Predicted-Y, Actual-Y and K-Value -------- ####
+comparison_df = pd.DataFrame(index=distance_df.index, columns=['Predicted Y','Actual Y', 'K-Value'])
+maxValueIndex = fruitCount_df.max(axis=1)
+
+for i in fruit_locations.index:
+    if lemonLoc[i] > (len(fruit_locations.columns)/2):
+        comparison_df.at[i,'predicted_y'] = 'lemon'
+    elif orangeLoc[i] > (len(fruit_locations.columns)/2):
+        comparison_df.at[i,'predicted_y'] = 'orange'
+    elif appleLoc[i] > (len(fruit_locations.columns)/2):
+        comparison_df.at[i,'predicted_y'] = 'apple'
+    elif mandarinLoc[i] > (len(fruit_locations.columns)/2):
+        comparison_df.at[i,'predicted_y'] = 'mandarin' 
+    #print(fruit_locations.loc[i])
+#if lemonLoc >= 2:
+#print(fruit_locations)
+
+counter = 0
+
+for row in fruit_locations.index:
+    #print(fruit_locations.at[row].values == 'lemon')
+    #print(fruit_locations.iloc[counter,:])
+    counter += 1
+
+for i in range(len(fruit_locations)):
+    prediction = fruit_locations.iloc[i,:]
+    #for fruit in prediction:
+        #fruitCount = fruitCount + fruit
+## make an array of actual fruit & predicted fruit
+    
+
+
+#for row in range(len(distance_df)):
+    #sorted_values.append(distance_df.iloc[row, np.argsort(distance_df.iloc[row,:])].head(k))
+    #print(distance_df.sort_values([distance_df.columns], ascending=False))
+    #print(distance_df.sort_values([i], ascending=False))
+    #for i2 in distance_df.columns
+#print(sorted_values.name)
+        
+## create a dictionary off the fruit names 
+## create a dictionary out of the y-values 
 ## K 1-10 is how many neighbors we are picking
 ## then pick the one that is most common
 
