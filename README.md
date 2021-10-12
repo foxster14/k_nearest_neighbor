@@ -1,4 +1,5 @@
 # K Nearest Neighbor
+The k-nearest neighbors (KNN) algorithm is a simple, supervised machine learning algorithm that can be used to solve both classification and regression problems.
 ## This program performs the following functions:
 * Write a python code to split the fruit dataset into 60:40 (train:test)
 * First 60% of the data is train and the bottom 40% is test
