@@ -25,6 +25,7 @@ import numpy as np
 import scipy.stats as stats
 from statistics import multimode, mode
 import random
+import matplotlib.pyplot as plt
 
 path = '/Users/sarahfox/OneDrive - Dunwoody College of Technology/Junior Year/Data Science/Lab 5/' #path where all files are stored
 filename = 'fruits_classification.csv'
@@ -119,15 +120,24 @@ for k in range(1,11):
         #comparison_df.at[testDataIndexValue[i],'Accuracy'] = accuracy_metric(fruit_locations, comparison_df.at[testDataIndexValue[i],'Actual Y'], comparison_df.at[testDataIndexValue[i],'Predicted Y'])
 
     actual = comparison_df['Actual Y']
-    print(fruitCount_df)
     predicted = comparison_df['Predicted Y']
-    #accuracyList = []
     accuracy = accuracy_metric(actual, predicted)
 
     k_value_vs_accuracy.at[k, 'Accuracy'] = accuracy
     k_value_vs_accuracy.at[k,'K Value'] = k
 
 
-print(k_value_vs_accuracy)
+#### ------ Plot Accurracy & K-Value on Scatter Plot Graph ------ ####
+x = k_value_vs_accuracy.iloc[:,0]
+y = k_value_vs_accuracy.iloc[:,1]
+plt.scatter(x,y)
+## Add an x-axis label
+plt.ylabel("K-Value")
+## Add a y-axis label
+plt.xlabel("Accuracy (%)")
+## Add a title
+plt.title("Accuracy vs K-Value")
+plt.show()
+
         
 
