@@ -1,6 +1,5 @@
 # K Nearest Neighbor
-***
-This program performs the following functions:
+## This program performs the following functions:
 * Write a python code to split the fruit dataset into 60:40 (train:test)
 * First 60% of the data is train and the bottom 40% is test
 
