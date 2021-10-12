@@ -1,9 +1,14 @@
-# split the train test
+# Randomly split the train/test by 60/40
 # then normalize the data
 # for each test through, find the euclidean distance from each training rows & each data point
 # arrange that vector in ascending order (don't reset index)
 # if k=1 then classify it as apple
 # add a column to the vector for distance 
+# for each row, iterate through columns for smallest x-values ####
+# out of the smallest values (make list), find most occurences of fruit_label        
+# Add a column called y_predicted to the test dataframe
+# find the most occured value 
+# find the frequency of each unique value, and choose the top frequency value
 
 import pandas as pd
 from sklearn import linear_model
@@ -13,6 +18,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 import numpy as np
 import scipy.stats as stats
+from statistics import multimode, mode
 
 path = '/Users/sarahfox/OneDrive - Dunwoody College of Technology/Junior Year/Data Science/Lab 5/' #path where all files are stored
 filename = 'fruits_classification.csv'
@@ -37,10 +43,6 @@ def euclidean_distance(x1, x2, y1, y2, z1, z2, k1, k2):
 	return distance
 
 distance_df = pd.DataFrame()
-#distance_df['distance'] = 0.0
-#distance_df['fruit_label'] = 0.0
-#distance_df['fruit_name'] = ''
-#fruitNames = []
 
 ## train data is the columns (header) of the new vector
 ## test data is the rows (index)
@@ -48,20 +50,7 @@ for index, row in x_test.iterrows():
     for index2, row2 in x_train.iterrows():
         distance = euclidean_distance(row['mass'], row2['mass'], row['width'], row2['width'], row['height'], row2['height'], row['color_score'], row2['color_score'])
         distance_df.loc[index, index2] = distance
-       
-
- #### for each row, iterate through columns for smallest x values ####
- #### out of the smallest values (make list), find most occurences of fruit_label        
- #### Add a column called y_predicted to the test dataframe
-    #distance = ((test.at[i,'mass'] - train.at[i, 'mass'])**2) + ((test.at[i,'width'] - train.at[i,'width'])**2) + ((test.at[i,'height'] - train.at[i,'height'])**2) + ((test.at[i,'color_score'] - train.at[i,'color_score'])**2)
-    #distance = np.sqrt(distance)
-    #distance_df.at[i,'distance'] = distance
-    #distance_df.at[i,'fruit_label'] = train.at[i,'fruit_label']
-
-## find the most occured value 
-## find the frequency of each unique value, and choose the top frequency value
-
-#print(distance_df.sort_values(by=columns))
+    
 k = 4
 
 #### -------- Sort Distance Values by Test & Find K-Nearest Neighbor ------ ####
@@ -117,17 +106,18 @@ comparison_df = pd.DataFrame(index=distance_df.index, columns=['Predicted Y','Ac
 maxValueIndex = fruitCount_df.max(axis=1)
 
 for i in fruit_locations.index:
-    if lemonLoc[i] > (len(fruit_locations.columns)/2):
-        comparison_df.at[i,'predicted_y'] = 'lemon'
-    elif orangeLoc[i] > (len(fruit_locations.columns)/2):
-        comparison_df.at[i,'predicted_y'] = 'orange'
-    elif appleLoc[i] > (len(fruit_locations.columns)/2):
-        comparison_df.at[i,'predicted_y'] = 'apple'
-    elif mandarinLoc[i] > (len(fruit_locations.columns)/2):
-        comparison_df.at[i,'predicted_y'] = 'mandarin' 
-    #print(fruit_locations.loc[i])
+    if lemonLoc[i] == maxValueIndex[i]:
+        comparison_df.at[i,'Predicted Y'] = 'lemon'
+    elif orangeLoc[i]== maxValueIndex[i]:
+        comparison_df.at[i,'Predicted Y'] = 'orange'
+    elif appleLoc[i] == maxValueIndex[i]:
+        comparison_df.at[i,'Predicted Y'] = 'apple'
+    elif mandarinLoc[i] == maxValueIndex[i]:
+        comparison_df.at[i,'Predicted Y'] = 'mandarin' 
+    #elif mandarinLoc[i] > (len(fruit_locations.columns)/2):
 #if lemonLoc >= 2:
 #print(fruit_locations)
+print(comparison_df)
 
 counter = 0
 
